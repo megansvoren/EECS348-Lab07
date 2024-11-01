@@ -2,192 +2,165 @@
  * Name: Megan Svoren
  * Lab Session: Wednesday @ 1:00pm
  * Lab #: Lab07
- * Last modified: 10/30/24
+ * Last modified: 10/31/24
 */
 #include <iostream>
 #include <fstream>
 
 using namespace std;
 
-const int MAX_SIZE = 4;
+const int SIZE = 4; // Global variable for matrix size
 
-// Matrix class consisting of a 2D array of integer values (the 2D array is the matrix)
-class Matrix
-{
-  public:
-    int values[MAX_SIZE][MAX_SIZE];
+class Matrix {
+private:
+  int data[SIZE][SIZE];  // 2D array for matrix data (using int for simplicity)
 
-    // Functions for operator overloading
-    Matrix operator+(Matrix x);
-    Matrix operator*(Matrix x);
+public:
+  // 1. Read values from file into a matrix
+  void readFromFile(int start_line);
+
+  // 2. Display a matrix
+  void display() const;
+
+  // 3. Add two matrices (operator overloading for +)
+  Matrix operator+(const Matrix& other) const;
+
+  // 4. Multiply two matrices (operator overloading for *)
+  Matrix operator*(const Matrix& other) const;
+
+  // 5. Compute the sum of matrix diagonal elements
+  int sumOfDiagonals() const;
+
+  // 6. Swap matrix rows
+  void swapRows(int row1, int row2);
 };
 
+// Function to read the matrix from the input file "matrix-data-file.txt"
+void Matrix::readFromFile(int start_line)
+{
+  ifstream file("matrix-data-file.txt");
+  int temp = 0;
+  // Skips the first 0 lines for mat1 and 4 lines for mat2 so the two matrices have the proper values
+  for (int i = 0; i < start_line; i++)
+  {
+    for (int j = 0; j < SIZE; j++)
+    {
+      file >> temp;
+    }
+  }
+
+  // Fills the matrix with the values in the file
+  for (int i = 0; i < SIZE; i++)
+  {
+    for (int j = 0; j < SIZE; j++)
+    {
+      file >> data[i][j];
+    }
+  }
+  file.close();
+}
+
+// Function to print the matrix in a user-friendly format
+void Matrix::display() const
+{
+  // print matrix
+  for (int i = 0; i < SIZE; i++)
+  {
+    for (int j = 0; j < SIZE; j++)
+    {
+      cout << data[i][j] << " ";
+    }
+    cout << endl;
+  }
+}
+
 // Function to overload the "+" operator for adding two matrices
-Matrix Matrix::operator+(Matrix matrix2)
+Matrix Matrix::operator+(const Matrix& other) const
 {
   Matrix result; // Creates result matrix
-  for (int i = 0; i < MAX_SIZE; i++)
+  for (int i = 0; i < SIZE; i++)
   {
-    for (int j = 0; j < MAX_SIZE; j++)
+    for (int j = 0; j < SIZE; j++)
     {
-      result.values[i][j] = values[i][j] + matrix2.values[i][j];
+      result.data[i][j] = data[i][j] + other.data[i][j];
     }
   }
   return result;
 }
 
 // Function to overload the "*" operator for multiplying two matrices
-Matrix Matrix::operator*(Matrix matrix2)
+Matrix Matrix::operator*(const Matrix& other) const
 {
   Matrix result; // Creates result matrix
-  for (int i = 0; i < MAX_SIZE; i++)
+  for (int i = 0; i < SIZE; i++)
   {
-    for (int j = 0; j < MAX_SIZE; j++)
+    for (int j = 0; j < SIZE; j++)
     {
-      result.values[i][j] = 0.0;
-      for (int k = 0; k < MAX_SIZE; k++)
+      result.data[i][j] = 0;
+      for (int k = 0; k < SIZE; k++)
       {
-        result.values[i][j] += values[i][k] * matrix2.values[k][j];
+        result.data[i][j] += data[i][k] * other.data[k][j];
       }
     }
   }
   return result;
 }
 
-
-
-// Function to read the two matrices from the input file "matrix-data-file.txt"
-void read_matrix_from_file(Matrix &matrix_1, Matrix &matrix_2, int &matrix_size)
+// Function to get the total sum of the primary diagonal and second diagonal of the matrix
+int Matrix::sumOfDiagonals() const
 {
-  ifstream file("matrix-data-file.txt");
-  file >> matrix_size; // Gets matrix size
-
-  // Fills matrix_1
-  for (int i = 0; i < MAX_SIZE; i++)
-  {
-    for (int j = 0; j < MAX_SIZE; j++)
-    {
-      file >> matrix_1.values[i][j];
-    }
-  }
-
-  // Fills matrix_2
-  for (int i = 0; i < MAX_SIZE; i++)
-  {
-    for (int j = 0; j < MAX_SIZE; j++)
-    {
-      file >> matrix_2.values[i][j];
-    }
-  }
-
-  file.close();
-}
-
-// Function to print one matrix in a user-friendly format to the console
-void print_matrix(Matrix matrix, int matrix_size)
-{
-  for (int i = 0; i < matrix_size; i++)
-  {
-    for (int j = 0; j < matrix_size; j++)
-    {
-      cout << matrix.values[i][j] << " ";
-    }
-    cout << endl;
-  }
-}
-
-// Function to print two matrices in a user-friendly format to the console
-void print_matrix(Matrix matrix_1, Matrix matrix_2, int matrix_size)
-{
-  // Prints matrix_1
-  cout << "Matrix 1:\n";
-  for (int i = 0; i < matrix_size; i++)
-  {
-    for (int j = 0; j < matrix_size; j++)
-    {
-      cout << matrix_1.values[i][j] << " ";
-    }
-    cout << endl;
-  }
-  cout << endl;
-
-  // Prints matrix_2
-  cout << "Matrix 2:\n";
-  for (int i = 0; i < matrix_size; i++)
-  {
-    for (int j = 0; j < matrix_size; j++)
-    {
-      cout << matrix_2.values[i][j] << " ";
-    }
-    cout << endl;
-  }
-}
-
-// Function to add two inputted matrices, using the overloaded "+" operator. Stores the result in the "result" matrix
-void add_matrices(Matrix matrix_1, Matrix matrix_2, Matrix &result, int matrix_size)
-{
-  result = matrix_1 + matrix_2;
-}
-
-// Function to multiply two inputted matrices, using the overloaded "*" operator. Stores the result in the "result" matrix
-void multiply_matrices(Matrix matrix_1, Matrix matrix_2, Matrix &result, int matrix_size)
-{
-  result = matrix_1 * matrix_2;
-}
-
-// Function to get the sum of the primary diagonal and the sum of the second diagonal of the inputted matrix. Prints these results to the console
-void get_diagonal_sum(Matrix matrix, int matrix_size) {
-  // TODO: Calculate and print the sum of the diagonal elements
+  // sum diags
   int primary_sum = 0;
   int secondary_sum = 0;
-  for (int i = 0; i < matrix_size; i++)
+  for (int i = 0; i < SIZE; i++)
   {
-    primary_sum += matrix.values[i][i];
-    secondary_sum += matrix.values[i][matrix_size - 1 - i];
+    primary_sum += data[i][i];
+    secondary_sum += data[i][SIZE - 1 - i];
   }
-  cout << "Sum of Primary Diagonals: " << primary_sum << "\nSum of Secondary Diagonals: " << secondary_sum << endl;
+  return primary_sum + secondary_sum;
 }
 
-// Function to swap the inputted rows of the inputted matrix. Prints the matrix with swapped rows to the console
-void swap_matrix_row(Matrix matrix, int matrix_size, int row1, int row2) {
-  // TODO: Swap the rows 'row1' and 'row2' in the matrix
-  //       Handle invalid row indices
-  if (row1 >= 0 && row2 >= 0 && row1 < matrix_size && row2 < matrix_size)
+// Function to swap the inputted rows of the matrix
+void Matrix::swapRows(int row1, int row2)
+{
+  // swap rows
+  if (row1 >= 0 && row2 >= 0 && row1 < SIZE && row2 < SIZE)
   {
-    double temp[matrix_size];
-    for (int i = 0; i < matrix_size; i++)
+    int temp[SIZE];
+    for (int i = 0; i < SIZE; i++)
     {
-      temp[i] = matrix.values[row1][i];
-      matrix.values[row1][i] = matrix.values[row2][i];
-      matrix.values[row2][i] = temp[i];
+      temp[i] = data[row1][i];
+      data[row1][i] = data[row2][i];
+      data[row2][i] = temp[i];
     }
   }
-  print_matrix(matrix, matrix_size);
 }
 
 // Main function to execute all functions
-int main(int argc, char *argv[]) {
-  Matrix matrix_1, matrix_2;
-  int matrix_size;
+int main() {
+  Matrix mat1;
+  mat1.readFromFile(0);
+  cout << "Matrix 1:" << endl;
+  mat1.display();
 
-  read_matrix_from_file(matrix_1, matrix_2, matrix_size);
-  print_matrix(matrix_1, matrix_2, matrix_size);
+  Matrix mat2;
+  mat2.readFromFile(4);
+  cout << "\nMatrix 2:" << endl;
+  mat2.display();
 
-  Matrix add_result;
-  add_matrices(matrix_1, matrix_2, add_result, matrix_size);
-  cout << "\nadd_matrices result:" << endl;
-  print_matrix(add_result, matrix_size);
+  Matrix sum = mat1 + mat2;
+  cout << "\nSum of matrices:" << endl;
+  sum.display();
 
-  Matrix multiply_result;
-  multiply_matrices(matrix_1, matrix_2, multiply_result, matrix_size);
-  cout << "\nmultiply_matrices result:" << endl;
-  print_matrix(multiply_result, matrix_size);
-  
-  cout << "\nget matrix diagonal sum" << endl;
-  get_diagonal_sum(matrix_1, matrix_size);
+  Matrix product = mat1 * mat2;
+  cout << "\nProduct of matrices:" << endl;
+  product.display();
 
-  cout << "\nswap matrix rows" << endl;
-  swap_matrix_row(matrix_1, matrix_size, 0, 1);
+  cout << "\nSum of diagonals of Matrix 1: " << mat1.sumOfDiagonals() << endl;
+
+  mat1.swapRows(0, 2);
+  cout << "\nMatrix 1 after swapping rows:" << endl;
+  mat1.display();
 
   return 0;
 }
